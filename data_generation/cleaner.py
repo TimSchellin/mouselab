@@ -15,25 +15,53 @@ DEST_CSV = "../data/cleaned_cursor_data.csv"
 source_data = []
 clean_data = []
 
-class Cleaner():
+class Cleaner:
     def __init__(self):
         self.source_data = []
         self.clean_data = []
-        self.line_offset = self.get_line_offsets()
+        self.line_offsets = self.get_line_offsets()
+        self.batch_num
+        self.current_offset
         
+    def clean(self):
+        pass
+    
+    def read_next_block(self, batch_num): # rename variables in this function
+        ''' open the csv file, read in all the data entries for one movement,
+        all the coords between two click events, and close the file when you
+        reach the next batch ie movement between click events'''
+        self.source_data = []
+        with open(SOURCE_CSV, 'r') as file:
+            current_seek_pos = self.line_offsets[self.current_offset] 
+            file.seek(current_seek_pos)
+            while self.get_batch_num(file, current_seek_pos) == batch_num: # only keep reading while batch number remains the same, check by looking at the first number in each csv entry
+                reader = csv.reader(file)
+                self.source_data.append(reader.__next__())
+                self.current_offset += 1
+                current_seek_pos = self.line_offsets[self.current_offset]
+        # this whole function is a mess, please rewrite it
+
+    def write_next_block():
+        pass
+    
+    def get_batch_num(self, file, seek_pos):
+        file.seek(seek_pos)
+        this_row = csv.reader(file).__next__()
+        file.seek(seek_pos)
+        return this_row[0]
+        
+        
+            
     def get_line_offsets(self):
         with open(SOURCE_CSV, 'r', 4096) as file:
-            line_offsets =[]
+            line_offsets = []
             offset = 0
             for line in file:
                 line_offsets.append(offset)
                 offset += len(line)
         return line_offsets
     
-    def read_next_block():
-        pass
-    
-    def write_next_block():
-        pass
-    
+c = Cleaner()
+c.clean()
+
         
