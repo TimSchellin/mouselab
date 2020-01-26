@@ -13,6 +13,7 @@ import csv
 TEST_SOURCE_CSV = "../../sandbox/sample.csv"
 CURRENT_LINE = 0
 CURRENT_BATCH_NUM = 1
+LAST_SEEK_POS = 28
 
 
 def main():
@@ -22,17 +23,21 @@ def main():
 def test_seek():
     global CURRENT_LINE
     global CURRENT_BATCH_NUM
+    global LAST_SEEK_POS
     batch_data = []
-    offsets = get_line_offsets()
+    #offsets = get_line_offsets()
     with open(TEST_SOURCE_CSV, 'r') as f:
-        f.seek(offsets[1])
+        f.seek(LAST_SEEK_POS)
         while get_batch_num(f) == CURRENT_BATCH_NUM:
             batch_data.append([int(i) if i.isdigit() else i 
                                for i in f.readline().rstrip('\n').split(',')])
         for entry in batch_data:
             print(entry)
         CURRENT_BATCH_NUM += 1
-            
+        LAST_SEEK_POS = f.tell()
+    with open(TEST_SOURCE_CSV, 'r') as f:
+        f.seek(LAST_SEEK_POS)
+          
 
 def get_batch_num(file):
     start_pos = file.tell()
