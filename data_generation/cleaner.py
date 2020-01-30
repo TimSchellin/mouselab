@@ -18,13 +18,16 @@ DEST_CSV = "../data/cleaned_cursor_data.csv"
 BUFFER_SIZE = 4096
 
 class Cleaner:
+    
     def __init__(self):
         self.current_line = 0
         self.current_batch_num = 1
         self.last_seek_pos = 0
         
     def clean(self):
-        pass
+        for n in range(self.n_final//.008):
+            
+        
     
     def read_next_block(self):
         ''' open the csv file, read in all the data entries for one movement,
@@ -52,15 +55,30 @@ class Cleaner:
             
     
     def get_batch_num(self, file, seek_pos):
-        ''' find the current data batch based on location in a file '''
+        ''' find the current data batch based on seek location in a file '''
         file.seek(seek_pos)
         this_row = csv.reader(file).__next__()
         file.seek(seek_pos)
         return this_row[0]
         
-    def get_batch_count(self):
+    def get_batch_count(self, file):
         ''' find the total number of batches in the source csv file '''
-        pass
+        return reversed(list(csv.reader(file)))[0][0]
+        '''
+        except TypeError:
+            print('type error')
+            for letter in file.readline():
+                if n := letter.isdigit():
+                    return int(n)
+            return None
+        except IndexError:
+            print('index error, [0][0] does not exist :(')
+        '''
+        
+    @property
+    def n_final(self):
+        return reversed(list(csv.reader(f)))[0][3]
+        
     '''
     def get_line_offsets(self):
         with open(SOURCE_CSV, 'rb', BUFFER_SIZE) as file:
