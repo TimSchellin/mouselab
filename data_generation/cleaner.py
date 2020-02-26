@@ -23,11 +23,12 @@ class Cleaner:
         self.current_line = 0
         self.current_batch_num = 1
         self.last_seek_pos = 0
+        self.batch_count = get_batch_count()
+        self.n_final = get_n_final()
+        
         
     def clean(self):
         for n in range(self.n_final//.008):
-            
-        
     
     def read_next_block(self):
         ''' open the csv file, read in all the data entries for one movement,
@@ -38,7 +39,7 @@ class Cleaner:
             f.seek(self.last_seek_pos)
             while self.get_batch_num(f) == self.current_batch_num:
                 batch_data.append([int(i) if i.isdigit() else i for i in
-                                    f.readline().rstrip('\n').split(',')])
+                                   f.readline().rstrip('\n').split(',')])
                 for entry in batch_data:
                     print(entry)
                 self.current_batch_num += 1
@@ -60,10 +61,16 @@ class Cleaner:
         this_row = csv.reader(file).__next__()
         file.seek(seek_pos)
         return this_row[0]
-        
-    def get_batch_count(self, file):
+      
+    def get_n_final(self):
+        pass
+        return reversed(list(csv.reader(f)))[0][3]
+    
+    def get_batch_count(self):
         ''' find the total number of batches in the source csv file '''
-        return reversed(list(csv.reader(file)))[0][0]
+        with open(SOURCE_CSV, 'r') as file:
+            return reversed(list(csv.reader(file)))[0][0]
+    
         '''
         except TypeError:
             print('type error')
@@ -74,11 +81,7 @@ class Cleaner:
         except IndexError:
             print('index error, [0][0] does not exist :(')
         '''
-        
-    @property
-    def n_final(self):
-        return reversed(list(csv.reader(f)))[0][3]
-        
+
     '''
     def get_line_offsets(self):
         with open(SOURCE_CSV, 'rb', BUFFER_SIZE) as file:
