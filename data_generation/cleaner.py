@@ -12,12 +12,15 @@ mouse clicks
 
 import csv
 
+
 # global constants
 SOURCE_CSV = "../data/recorded_cursor_data.csv"
 DEST_CSV = "../data/cleaned_cursor_data.csv"
 BUFFER_SIZE = 4096
 
+
 class Cleaner:
+    
     
     def __init__(self):
         self.current_line = 0
@@ -27,8 +30,38 @@ class Cleaner:
         self.n_final = get_n_final()
         
         
-    def clean(self):
-        for n in range(self.n_final//.008):
+    def clean(self, raw_data):
+        ''' the clean function takes the points from the raw data, which is
+        recorded at non-uniform time intervals and calculates "fake data"
+        where points would be if their position was recorded at exactly 8 ms
+        intervals
+        '''
+        t_init = raw_data[0][0][2]
+        t_final = sum([entry[2] for entry in raw_data])
+        t_net = t_final - t_initial
+        
+        #define the two points on either side of our hypothetical piont
+        p1 = raw_data[0]
+        p2 = raw_data[1]
+        
+        #create vectors for the x and y variables with respect to time
+        xline = [i[0], i[2] for i in [p1, p2]]
+        yline = [i[1], i[2] for i in [p1, p2]]
+        clean_data = []
+        
+        #populate clean data list by fitting raw data to 8 ms intervals
+        for t in  [i*8 for i in range(t_net//8)]:
+            p2 = raw_data[p1.index() + 1]
+            if t >= p2[2]:
+                xline = create_line(p1, p2, 0)
+                yline = creat_line(p1, p2, 1)
+                p1 = raw_data [p1.index() + 1]
+                x_intercept = find_intercept(xline, t)
+                y_intercept = find_intercept(yline, t)
+                clean_data.append([x_intercept, y_intercept, t])
+        return clean_data
+            
+        
     
     def read_next_block(self):
         ''' open the csv file, read in all the data entries for one movement,
@@ -63,7 +96,6 @@ class Cleaner:
         return this_row[0]
       
     def get_n_final(self):
-        pass
         return reversed(list(csv.reader(f)))[0][3]
     
     def get_batch_count(self):
