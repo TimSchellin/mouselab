@@ -30,7 +30,7 @@ class Cleaner:
         self.n_final = get_n_final()
         
         
-    def clean(self, raw_data):
+    def clean_batch(self, raw_data):
         ''' the clean function takes the points from the raw data, which is
         recorded at non-uniform time intervals and calculates "fake data"
         where points would be if their position was recorded at exactly 8 ms
@@ -59,49 +59,7 @@ class Cleaner:
                 x_intercept = find_intercept(xline, t)
                 y_intercept = find_intercept(yline, t)
                 clean_data.append([x_intercept, y_intercept, t])
-        return clean_data
-            
-        
-    
-    def read_next_block(self):
-        ''' open the csv file, read in all the data entries for one movement,
-        all the coords between two click events, and close the file when you
-        reach the next batch ie movement between click events'''
-        batch_data = []
-        with open(SOURCE_CSV, 'r', BUFFER_SIZE) as f:
-            f.seek(self.last_seek_pos)
-            while self.get_batch_num(f) == self.current_batch_num:
-                batch_data.append([int(i) if i.isdigit() else i for i in
-                                   f.readline().rstrip('\n').split(',')])
-                for entry in batch_data:
-                    print(entry)
-                self.current_batch_num += 1
-                self.last_seek_pos = f.tell()
-        return batch_data
-                
-    
-    def write_next_block(self, clean_data):
-        ''' append the cleaned data to a cleaned_data csv file, one batch at
-        a time'''
-        with open(DEST_CSV, 'a', BUFFER_SIZE) as f:
-            writer = csv.writer(f)
-            writer.writerows(clean_data)
-            
-    
-    def get_batch_num(self, file, seek_pos):
-        ''' find the current data batch based on seek location in a file '''
-        file.seek(seek_pos)
-        this_row = csv.reader(file).__next__()
-        file.seek(seek_pos)
-        return this_row[0]
-      
-    def get_n_final(self):
-        return reversed(list(csv.reader(f)))[0][3]
-    
-    def get_batch_count(self):
-        ''' find the total number of batches in the source csv file '''
-        with open(SOURCE_CSV, 'r') as file:
-            return reversed(list(csv.reader(file)))[0][0]
+        return clean_data            
     
         '''
         except TypeError:
